@@ -1,0 +1,14 @@
+{
+  "name": "musenex",
+  "productName": "MuseNex",
+  "version": "1.0.0",
+  "private": true,
+  "description": "本地双工作区创作画布：参考板 + 无限画布",
+  "main": "shell/main.js",
+  "scripts": {
+    "dev": "bash scripts/dev.command",
+    "build": "node scripts/build-app.mjs",
+    "install": "node scripts/build-app.mjs --install",
+    "check": "node scripts/check.mjs"
+  }
+}

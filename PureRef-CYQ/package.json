@@ -1,0 +1,14 @@
+{
+  "name": "@musenex/workspace-board",
+  "private": true,
+  "version": "1.0.0",
+  "description": "MuseNex 参考板工作区：PureRef 风格无限图片画布",
+  "type": "module",
+  "main": "renderer/index.html",
+  "musenex": {
+    "workspace": "board",
+    "kind": "main",
+    "entry": "renderer/index.html",
+    "algorithmDoc": "ALGORITHM.md"
+  }
+}

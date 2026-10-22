@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>无限画布 · Infinite Canvas</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app" class="canvas-page">
+      <div class="canvas-board" id="canvasHost" data-tool="select">
+        <canvas class="canvas-grid" id="gridCanvas" aria-hidden="true"></canvas>
+
+        <div class="viewport" id="viewport">
+          <svg class="edge-layer" id="edgeLayer" width="1" height="1" overflow="visible">
+            <defs>
+              <marker id="edge-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="currentColor" />
+              </marker>
+            </defs>
+            <g class="edge-layer__edges" id="edgeGroup"></g>
+            <path class="edge-pending" id="edgePending" d=""></path>
+          </svg>
+          <div class="node-layer" id="nodeLayer"></div>
+          <svg class="overlay-layer" id="overlayLayer" width="1" height="1" overflow="visible">
+            <g id="guidesGroup"></g>
+            <g id="annotationsGroup"></g>
+          </svg>
+        </div>
+
+        <div class="selection-box" id="selectionBox" hidden></div>
+
+        <!-- top chrome: gradient + logo/title left, controls right -->
+        <div class="canvas-header-gradient" aria-hidden="true"></div>
+        <div class="canvas-header">
+          <div class="canvas-header__left">
+            <button class="canvas-brand" id="brandBtn" title="回到适配视图">
+              <span class="canvas-brand__mark" aria-hidden="true"></span>
+            </button>
+            <div class="canvas-doc">
+              <input id="docTitle" class="canvas-doc__title" value="未命名画布" spellcheck="false" aria-label="画布名称" />
+              <span class="canvas-doc__status" id="saveStatus">已保存</span>
+            </div>
+          </div>
+          <div class="canvas-header__right">
+            <button class="api-chip" id="apiBtn" title="APIMart 连接状态">
+              <span class="api-chip__dot"></span><span class="api-chip__text">API</span>
+            </button>
+            <button class="canvas-ctrl" id="searchBtn" title="搜索节点 (⌘F)">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" /></svg>
+            </button>
+            <button class="canvas-ctrl" id="themeBtn" title="切换主题">
+              <svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4 8.5 8.5 0 1020 14.5z" /></svg>
+            </button>
+            <div class="menu-wrap">
+              <button class="canvas-ctrl" id="moreBtn" title="更多">
+                <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="19" cy="12" r="1.4" /></svg>
+              </button>
+              <div class="menu" id="moreMenu" hidden>
+                <button class="menu__item" data-action="export"><span>导出画布 JSON</span><kbd>⌘S</kbd></button>
+                <button class="menu__item" data-action="import"><span>导入画布 JSON</span></button>
+                <button class="menu__item" data-action="png"><span>导出为 PNG</span></button>
+                <div class="menu__sep"></div>
+                <button class="menu__item" data-action="organize-left"><span>整理画布 · 左对齐</span></button>
+                <button class="menu__item" data-action="organize-center"><span>整理画布 · 居中对齐</span></button>
+                <button class="menu__item" data-action="organize-right"><span>整理画布 · 右对齐</span></button>
+                <div class="menu__sep"></div>
+                <button class="menu__item" data-action="assets"><span>素材库</span></button>
+                <button class="menu__item" data-action="globalHistory"><span>全部生成历史</span></button>
+                <button class="menu__item" data-action="queue"><span>生成队列</span></button>
+                <button class="menu__item" data-action="nodeManager"><span>节点管理</span></button>
+                <button class="menu__item" data-action="read"><span>阅读视图（只读）</span></button>
+                <button class="menu__item" data-action="interaction"><span>切换交互模式（RHTV / ComfyUI）</span></button>
+                <button class="menu__item" data-action="shortcuts"><span>键盘快捷键</span><kbd>?</kbd></button>
+                <div class="menu__sep"></div>
+                <button class="menu__item" data-action="theme"><span>切换明暗主题</span></button>
+                <button class="menu__item" data-action="demo"><span>载入示例画布</span></button>
+                <button class="menu__item menu__item--danger" data-action="clear"><span>清空画布</span></button>
+                <div class="menu__sep"></div>
+                <div class="menu__hint">按 runninghub.cn 无限画布逆向重建 · ⌘Z 撤销</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- left vertical toolbar (recovered layout: 48px pill, left:16, centered) -->
+        <aside class="canvas-toolbar" id="toolbar">
+          <button class="canvas-toolbar__add" id="addNodeBtn" data-edit="1" title="添加节点 (N)" aria-label="添加节点">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+          </button>
+          <button class="canvas-toolbar__btn" id="searchBtn2" title="节点管理">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" /></svg>
+          </button>
+          <span class="canvas-toolbar__rule"></span>
+          <button class="canvas-toolbar__btn" id="toolSelect" title="选择 (V)" data-tool="select">
+            <svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L9.6 20z" /></svg>
+          </button>
+          <button class="canvas-toolbar__btn" id="toolHand" title="抓手 (H / 空格)" data-tool="hand">
+            <svg viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 013 0V12m0-6.5a1.5 1.5 0 013 0V12m0-5a1.5 1.5 0 013 0v7m0-4a1.5 1.5 0 013 0v5a6 6 0 01-6 6h-2.2a6 6 0 01-4.9-2.6L5 14.6a1.6 1.6 0 012.6-1.8L9 14" /></svg>
+          </button>
+          <span class="canvas-toolbar__rule"></span>
+          <button class="canvas-toolbar__btn" id="groupBtn" title="编组 (⌘G)">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.6" /><rect x="13" y="3" width="8" height="8" rx="1.6" /><rect x="3" y="13" width="8" height="8" rx="1.6" /><rect x="13" y="13" width="8" height="8" rx="1.6" /></svg>
+          </button>
+          <button class="canvas-toolbar__btn" id="alignBtn" title="对齐">
+            <svg viewBox="0 0 24 24"><path d="M4 4v16" /><rect x="8" y="7" width="11" height="4" rx="1" /><rect x="8" y="14" width="7" height="4" rx="1" /></svg>
+          </button>
+          <button class="canvas-toolbar__btn" id="queueBtn" title="生成队列">
+            <svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h7M4 17h10" /><path d="M18 10l3 2-3 2z" /><circle cx="19" cy="6" r="1.6" /></svg>
+            <span class="canvas-toolbar__badge" id="queueBadge" hidden>0</span>
+          </button>
+          <button class="canvas-toolbar__btn" id="assetsBtn" title="素材库">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9.5" r="1.6" /><path d="M21 15l-5-5-9 9" /></svg>
+          </button>
+          <button class="canvas-toolbar__btn" id="paramsBtn" data-edit="1" title="节点参数面板 (P)">
+            <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
+          </button>
+          <button class="canvas-toolbar__btn" id="annotateBtn" data-edit="1" title="标注（箭头 / 文字）">
+            <svg viewBox="0 0 24 24"><path d="M4 20L20 4" /><path d="M13 4h7v7" /><circle cx="5" cy="19" r="1.6" /></svg>
+          </button>
+          <button class="canvas-toolbar__btn" id="tidyBtn" title="整理画布">
+            <svg viewBox="0 0 24 24"><path d="M4 6h7M4 12h12M4 18h9" /><path d="M17 15l3 3-3 3" /></svg>
+          </button>
+          <span class="canvas-toolbar__rule"></span>
+          <button class="canvas-toolbar__btn is-on" id="gridBtn" title="网格吸附">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" /><path d="M4 10h16M4 15h16M10 4v16M15 4v16" /></svg>
+          </button>
+          <button class="canvas-toolbar__btn" id="snapBtn" title="对齐参考线">
+            <svg viewBox="0 0 24 24"><path d="M12 3v18" /><path d="M6 8h12M6 16h12" /></svg>
+          </button>
+          <span class="canvas-toolbar__rule"></span>
+        </aside>
+
+        <!-- add-node panel, anchored to the toolbar -->
+        <aside class="add-panel" id="addPanel" hidden>
+          <div class="add-panel__head">
+            <h2>添加节点</h2>
+            <button class="add-panel__close" id="closeAddPanel" title="关闭">
+              <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+          </div>
+          <label class="add-panel__search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" /></svg>
+            <input id="addPanelSearch" placeholder="搜索节点…" spellcheck="false" />
+          </label>
+          <div class="add-panel__body" id="addPanelBody"></div>
+          <div class="add-panel__foot">点击添加 · 拖拽到画布</div>
+        </aside>
+
+        <!-- bottom-left pill: view toggles + zoom slider + reset + fit -->
+        <div class="zoom-pill" id="zoomPill">
+          <button class="zoom-pill__btn" id="edgesBtn" title="隐藏 / 显示连线">
+            <svg viewBox="0 0 24 24"><path d="M4 17c4 0 4-10 8-10s4 10 8 10" /><circle cx="4" cy="17" r="1.6" /><circle cx="20" cy="17" r="1.6" /></svg>
+          </button>
+          <button class="zoom-pill__btn" id="minimapBtn" title="小地图">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M7 14l3-4 3 3 2-2 3 4" /></svg>
+          </button>
+          <button class="zoom-pill__btn" id="gridToggleBtn" title="显示 / 隐藏网格">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" /><path d="M4 10h16M4 15h16M10 4v16M15 4v16" /></svg>
+          </button>
+          <div class="zoom-pill__slider-wrap">
+            <input type="range" id="zoomSlider" min="7" max="300" step="1" value="100" aria-label="缩放" />
+          </div>
+          <button class="zoom-pill__pct" id="zoomValue" title="重置为 100% (⌘0)">100%</button>
+          <button class="zoom-pill__btn" id="undoBtn" title="撤销 (⌘Z)">
+            <svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5" /><path d="M4 9h10a5 5 0 010 10h-3" /></svg>
+          </button>
+          <button class="zoom-pill__btn" id="redoBtn" title="重做 (⇧⌘Z)">
+            <svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5" /><path d="M20 9H10a5 5 0 000 10h3" /></svg>
+          </button>
+          <button class="zoom-pill__btn" id="fitBtn" title="适配画布 (⇧1)">
+            <svg viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 011-1h4M15 4h4a1 1 0 011 1v4M20 15v4a1 1 0 01-1 1h-4M9 20H5a1 1 0 01-1-1v-4" /></svg>
+          </button>
+        </div>
+
+        <!-- bottom-left minimap (recovered: 220×150 @ left16/bottom56) -->
+        <div class="minimap" id="minimap">
+          <canvas id="minimapCanvas" width="220" height="150"></canvas>
+        </div>
+
+        <div class="hud" id="hud">节点 0 · 连线 0</div>
+
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-state__card">
+            <div class="empty-state__eyebrow">空白画布</div>
+            <h2>从一张图开始，拖出你的第一条素材流</h2>
+            <p>双击画布或按 <kbd>N</kbd> 添加节点；从节点右侧悬停出现的 <b>+</b> 拖出连线，松开在目标节点上即可吸附连接。</p>
+            <div class="empty-state__actions">
+              <button class="btn btn--primary" id="emptyAdd">添加节点</button>
+              <button class="btn" id="emptyDemo">载入示例</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="drop-hint" id="dropHint">
+          <div class="drop-hint__icon">
+            <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" /></svg>
+          </div>
+          <div class="drop-hint__title">松开以添加到画布</div>
+          <div class="drop-hint__sub">支持图片、视频、音频与 JSON 画布文件</div>
+        </div>
+      </div>
+
+      <div class="menu" id="alignMenu" hidden>
+        <button class="menu__item" data-align="left"><span>左对齐</span></button>
+        <button class="menu__item" data-align="hcenter"><span>水平居中</span></button>
+        <button class="menu__item" data-align="right"><span>右对齐</span></button>
+        <div class="menu__sep"></div>
+        <button class="menu__item" data-align="top"><span>顶部对齐</span></button>
+        <button class="menu__item" data-align="vcenter"><span>垂直居中</span></button>
+        <button class="menu__item" data-align="bottom"><span>底部对齐</span></button>
+        <div class="menu__sep"></div>
+        <button class="menu__item" data-align="distribute-h"><span>水平等距分布</span></button>
+        <button class="menu__item" data-align="distribute-v"><span>垂直等距分布</span></button>
+      </div>
+
+      <div class="menu" id="themeMenu" hidden>
+        <button class="menu__item" data-theme="dark"><span>深色</span></button>
+        <button class="menu__item" data-theme="light"><span>浅色</span></button>
+        <button class="menu__item" data-theme="eyeCare"><span>护眼</span></button>
+      </div>
+
+      <div class="menu" id="contextMenu" hidden></div>
+
+      <div class="dialog-backdrop" id="nodeSearch" hidden>
+        <div class="dialog dialog--search">
+          <div class="dialog__search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" /></svg>
+            <input id="nodeSearchInput" placeholder="搜索节点类型，回车添加到画布…" spellcheck="false" />
+            <span class="kbd-hint">ESC</span>
+          </div>
+          <div class="dialog__results" id="nodeSearchResults"></div>
+        </div>
+      </div>
+
+      <div class="toast-host" id="toastHost"></div>
+      <input type="file" id="importInput" accept=".json,application/json,image/*,video/*,audio/*" multiple hidden />
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

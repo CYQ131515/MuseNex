@@ -1,0 +1,45 @@
+{
+  "app": {
+    "name": "MuseNex",
+    "version": "1.0.0",
+    "bundleId": "com.musenex.app",
+    "icon": "assets/app-icon-1024.png",
+    "description": "本地双工作区创作画布：参考板 + 无限画布（节点式 AI 工作流）"
+  },
+  "mainWorkspace": "board",
+  "workspaces": [
+    {
+      "id": "board",
+      "name": "参考板",
+      "kind": "main",
+      "dir": "PureRef-CYQ",
+      "entry": "renderer/index.html",
+      "preload": "shell/preload-main.js",
+      "shortcut": "CommandOrControl+1",
+      "shortcutLabel": "⌘1",
+      "icon": "board",
+      "description": "PureRef 风格无限图片画布：收集、拼贴、标注、导出",
+      "capabilities": []
+    },
+    {
+      "id": "canvas",
+      "name": "无限画布",
+      "kind": "view",
+      "dir": "infinite-canvas",
+      "webRoot": "dist",
+      "entry": "infinite-canvas.html",
+      "preload": "shell/preload-view.js",
+      "shortcut": "CommandOrControl+2",
+      "shortcutLabel": "⌘2",
+      "icon": "nodes",
+      "description": "节点式 AI 工作流画布：生成、编排、参考图互通",
+      "capabilities": ["addImages", "pullImages"],
+      "apiProxy": {
+        "configFile": "canvas-config.json",
+        "baseUrlDefault": "https://api.apimart.ai/v1",
+        "envKey": "APIMART_API_KEY",
+        "envBase": "APIMART_BASE_URL"
+      }
+    }
+  ]
+}

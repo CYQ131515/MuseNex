@@ -1,0 +1,11 @@
+# 逆向留档（原版 PureRef.app，143MB，版权归原作者，不发布）
+/00-target/
+
+# 构建产物 / 运行时（从仓库根构建，不纳入版本管理）
+/.runtime/
+node_modules/
+*.log
+.DS_Store
+
+# 本地密钥（使用 userData 或环境变量）
+infinite-canvas/config.local.json

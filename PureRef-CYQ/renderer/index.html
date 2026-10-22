@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MuseNex · 参考板</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="dark">
+<div id="app">
+  <canvas id="scene"></canvas>
+  <div id="notes-layer"></div>
+  <canvas id="overlay"></canvas>
+
+  <!-- 标题栏（悬停显示） -->
+  <div id="titlebar" class="titlebar">
+    <div class="tb-left">
+      <button class="traffic close" id="tb-close" title="关闭"></button>
+      <button class="traffic min" id="tb-min" title="最小化"></button>
+      <button class="traffic max" id="tb-max" title="最大化"></button>
+    </div>
+    <div class="tb-title" id="tb-title">未命名</div>
+    <div class="tb-right">
+      <button class="icon-btn" id="tb-pin" title="始终置顶">
+        <svg viewBox="0 0 24 24"><path d="M9 4h6l-1 6 4 4v2h-5v4l-1 2-1-2v-4H6v-2l4-4-1-6z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 层级面板 -->
+  <aside id="hierarchy" class="hierarchy hidden">
+    <div class="hier-head">
+      <input id="scene-name" class="scene-name" value="未命名" spellcheck="false" />
+      <button class="icon-btn small" id="hier-close" title="关闭">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="hier-tools">
+      <input id="hier-search" class="hier-search" placeholder="搜索…" spellcheck="false" />
+    </div>
+    <div id="hier-list" class="hier-list"></div>
+    <div class="hier-foot">
+      <span id="hier-count">0 项</span>
+      <span class="hier-hint">拖拽可改变父子关系</span>
+    </div>
+  </aside>
+
+  <!-- 空场景 -->
+  <div id="empty" class="empty hidden">
+    <div class="dropzone">
+      <svg class="drop-icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="M4 17l5-5 4 4 3-3 4 4"/></svg>
+      <div class="drop-text">将图片拖到这里</div>
+      <div class="drop-sub">或</div>
+      <button class="btn primary" id="btn-browse">浏览图片</button>
+      <button class="link-btn" id="btn-canvas">打开无限画布工作区</button>
+    </div>
+    <div id="recent" class="recent hidden">
+      <div class="recent-head"><span>最近打开</span><button class="link" id="recent-clear">清空</button></div>
+      <div id="recent-list" class="recent-list"></div>
+    </div>
+  </div>
+
+  <!-- 底部浮动工具栏 -->
+  <div id="toolbar" class="toolbar hidden"></div>
+
+  <!-- 状态 -->
+  <div id="status-icon" class="status-icon" title="场景状态"><span></span></div>
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- 浮层 -->
+  <div id="overlay-root" class="overlay-root hidden"></div>
+  <div id="menu-root" class="menu-root hidden"></div>
+  <div id="hint" class="hint hidden"></div>
+
+  <!-- 隐藏文件输入 -->
+  <input type="file" id="file-input" multiple accept="image/*" style="display:none" />
+</div>
+<script src="i18n.js"></script>
+<script src="store.js"></script>
+<script src="render.js"></script>
+<script src="interact.js"></script>
+<script src="ui.js"></script>
+<script src="boot.js"></script>
+</body>
+</html>
