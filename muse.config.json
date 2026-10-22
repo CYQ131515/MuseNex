@@ -4,7 +4,8 @@
     "version": "1.0.0",
     "bundleId": "com.musenex.app",
     "icon": "assets/app-icon-1024.png",
-    "description": "本地双工作区创作画布：参考板 + 无限画布（节点式 AI 工作流）"
+    "description": "本地双工作区创作画布：参考板 + 无限画布（节点式 AI 工作流）",
+    "electronVersion": "43.7.9"
   },
   "mainWorkspace": "board",
   "workspaces": [
@@ -33,7 +34,10 @@
       "shortcutLabel": "⌘2",
       "icon": "nodes",
       "description": "节点式 AI 工作流画布：生成、编排、参考图互通",
-      "capabilities": ["addImages", "pullImages"],
+      "capabilities": [
+        "addImages",
+        "pullImages"
+      ],
       "apiProxy": {
         "configFile": "canvas-config.json",
         "baseUrlDefault": "https://api.apimart.ai/v1",

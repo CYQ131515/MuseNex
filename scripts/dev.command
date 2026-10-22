@@ -4,9 +4,8 @@ set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/.runtime/MuseNex.app"
 if [ ! -d "$APP" ]; then
-  echo "未找到 $APP（构建运行时应在 .runtime/ 隐藏目录）"
-  read -r -p "按回车退出…" _
-  exit 1
+  echo "首次运行：准备 Electron 运行时…"
+  node "$ROOT/scripts/bootstrap-runtime.mjs" || exit 1
 fi
 DEV_DATA="$HOME/Library/Application Support/MuseNex-dev"
 CFG="$HOME/Library/Application Support/MuseNex/canvas-config.json"

@@ -44,7 +44,7 @@ MuseNex/
 ├── assets/                  ← 图标源文件
 ├── examples/                ← 示例场景与示例图片
 ├── docs/                    ← 规格、证据、架构、融合说明、截图
-├── scripts/                 ← dev.command / build-app.mjs / install.sh / check.mjs
+├── scripts/                 ← dev.command / build-app.mjs / bootstrap-runtime.mjs / install.sh / check.mjs
 ├── 00-target/               ← 被逆向的 PureRef 原版样本（143MB，仅留档，可删）
 └── README.md
 ```
@@ -70,7 +70,11 @@ MuseNex/
 ## 开发与构建
 
 ```bash
+git clone https://github.com/CYQ131515/MuseNex.git
 cd MuseNex
+
+# 首次需要准备 Electron 运行时（约 280MB，不提交到仓库；自动下载，可用 ELECTRON_ZIP 指定本地 zip）
+node scripts/bootstrap-runtime.mjs
 
 # 开发（源码即时生效，独立数据目录 + CDP 9222）
 ./scripts/dev.command
@@ -85,7 +89,8 @@ node scripts/build-app.mjs
 node scripts/check.mjs
 ```
 
-运行时说明：`.runtime/MuseNex.app` 是重命名后的 Electron 运行时（隐藏，不会被搜到）；构建只替换其
+运行时说明：`.runtime/MuseNex.app` 是重命名后的 Electron 运行时（隐藏、不提交；首次构建会自动下载
+`electron-v43.7.9-darwin-arm64.zip` 并改名，也可用 `ELECTRON_ZIP` 指定本地 zip）；构建只替换其
 `Contents/Resources/app` 与图标，不复制 300MB 框架。开发模式用
 `.runtime/MuseNex.app/Contents/MacOS/MuseNex <仓库根>` 直接以仓库为 app 入口。
 

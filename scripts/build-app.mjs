@@ -31,6 +31,10 @@ if (!fs.existsSync(APP) && fs.existsSync(LEGACY_APP)) {
   fs.renameSync(LEGACY_APP, APP);
   fs.writeFileSync(path.join(path.dirname(APP), '.metadata_never_index'), '');
 }
+if (!fs.existsSync(APP)) {
+  console.log('[build] 未找到构建运行时，先执行 scripts/bootstrap-runtime.mjs …');
+  execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'bootstrap-runtime.mjs')], { stdio: 'inherit' });
+}
 if (!fs.existsSync(APP)) fail(`未找到构建运行时 ${APP}（应位于隐藏目录 .runtime/）`);
 
 log('停止运行中的实例…');
